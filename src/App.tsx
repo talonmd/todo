@@ -1,25 +1,31 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import { Container, Box, List, Typography, Button } from '@mui/material';
+
+import { useToDo, ToDoContextProps } from './context/todo';
+
+import NewTaskDialog from './components/NewTaskDialog';
+import Task from './components/Task';
 
 function App() {
+  const { toDos } = useToDo() as ToDoContextProps;
+
+  const [open, setOpen] = useState(false);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Container maxWidth="sm">
+      <Typography variant="h4">To Do</Typography>
+      <Box>
+        <List>
+          {toDos.map(task => (
+            <Task task={task} key={task.id} />
+          ))}
+        </List>
+        <Button variant="outlined" onClick={() => setOpen(true)}>
+          Create New Task
+        </Button>
+      </Box>
+      <NewTaskDialog open={open} setOpen={setOpen} />
+    </Container>
   );
 }
 
