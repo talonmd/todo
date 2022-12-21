@@ -10,6 +10,7 @@ export interface ToDoContextProps {
   update: (id: number, data: any) => void;
   remove: (id: number) => void;
   error: string | null;
+  setError: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
 export const ToDoContext = createContext<ToDoContextProps | null>(null);
@@ -20,7 +21,7 @@ interface ToDoProviderProps {
 
 export const ToDoProvider: React.FC<ToDoProviderProps> = ({ children }) => {
   const [toDos, setToDos] = useState<ToDo[]>([]);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   // JSON Placeholder always gives new tasks an id of 201, regardless of what is passed so I am manually incrementing them to prevent duplicate ids
   const [id, setId] = useState(201);
@@ -28,11 +29,9 @@ export const ToDoProvider: React.FC<ToDoProviderProps> = ({ children }) => {
   useEffect(() => {
     (async () => {
       try {
-        const tasks = await getToDos();
-        console.log(tasks);
-        setToDos(tasks.data.slice(0, 10));
+        const response = await getToDos();
+        setToDos(response.data.slice(0, 10));
       } catch (err: any) {
-        console.log(err);
         setError(err.message);
       }
     })();
@@ -44,20 +43,20 @@ export const ToDoProvider: React.FC<ToDoProviderProps> = ({ children }) => {
       setToDos(current => [...current, { ...response.data, id }]);
       setId(current => current + 1);
     } catch (err: any) {
-      console.log(err);
       setError(err.message);
     }
   };
 
   const update = async (id: number, data: any) => {
     try {
+      // typically would do something with response, but it sends back incorrect dummy data
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const response = await updateToDo(id, data);
       setToDos(current => {
-        const index = current.findIndex(task => task.id === response.data.id);
-        return [...current.slice(0, index), response.data, ...current.slice(index + 1)];
+        const index = current.findIndex(task => task.id === id);
+        return [...current.slice(0, index), { ...current[index], ...data }, ...current.slice(index + 1)];
       });
     } catch (err: any) {
-      console.log(err);
       setError(err.message);
     }
   };
@@ -67,7 +66,6 @@ export const ToDoProvider: React.FC<ToDoProviderProps> = ({ children }) => {
       await deleteToDo(id);
       setToDos(current => current.filter(task => task.id !== id));
     } catch (err: any) {
-      console.log(err);
       setError(err.message);
     }
   };
@@ -80,6 +78,7 @@ export const ToDoProvider: React.FC<ToDoProviderProps> = ({ children }) => {
         remove,
         update,
         error,
+        setError,
       }}
     >
       {children}

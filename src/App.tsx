@@ -1,18 +1,23 @@
 import React, { useState } from 'react';
-import { Container, Box, List, Typography, Button } from '@mui/material';
+import { Container, Alert, Box, List, Typography, Button } from '@mui/material';
 
 import { useToDo, ToDoContextProps } from './context/todo';
 
-import NewTaskDialog from './components/NewTaskDialog';
+import TaskDialog from './components/TaskDialog';
 import Task from './components/Task';
 
 function App() {
-  const { toDos } = useToDo() as ToDoContextProps;
+  const { toDos, error, setError } = useToDo() as ToDoContextProps;
 
   const [open, setOpen] = useState(false);
 
   return (
     <Container maxWidth="sm">
+      {error ? (
+        <Alert severity="error" onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      ) : null}
       <Typography variant="h4">To Do</Typography>
       <Box>
         <List>
@@ -24,7 +29,7 @@ function App() {
           Create New Task
         </Button>
       </Box>
-      <NewTaskDialog open={open} setOpen={setOpen} />
+      <TaskDialog open={open} setOpen={setOpen} />
     </Container>
   );
 }
